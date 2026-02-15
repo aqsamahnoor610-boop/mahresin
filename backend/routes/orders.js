@@ -54,12 +54,14 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { user_id, user_email, items, total, shipping_address, payment_method } = req.body
+    
+    console.log('Creating order:', { user_id, user_email, itemsCount: items?.length, total })
 
     const { data, error } = await supabase
       .from('orders')
       .insert([{ 
-        user_id, 
-        user_email,
+        user_id: user_id || null, 
+        user_email: user_email || null,
         items, 
         total, 
         shipping_address,
@@ -69,9 +71,15 @@ router.post('/', async (req, res) => {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('Supabase error:', error)
+      throw error
+    }
+    
+    console.log('Order created:', data.id)
     res.status(201).json({ data })
   } catch (error) {
+    console.error('Create order error:', error.message)
     res.status(500).json({ error: error.message })
   }
 })

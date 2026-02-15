@@ -56,7 +56,8 @@ const Checkout = () => {
 
     try {
       const orderData = {
-        user_id: user?.id,
+        user_id: user?.id || null,
+        user_email: user?.email || formData.email || null,
         items: cartItems.map(item => ({
           product_id: item.id,
           title: item.title,
@@ -64,10 +65,9 @@ const Checkout = () => {
           quantity: item.quantity,
           image: item.images?.[0]
         })),
-        total_price: cartTotal,
+        total: cartTotal,
         payment_method: paymentMethod,
-        status: 'pending',
-        shipping_info: {
+        shipping_address: {
           name: formData.name,
           phone: formData.phone,
           address: formData.address,
