@@ -41,19 +41,39 @@ const ProductDetail = () => {
     const fetchData = async () => {
       setLoading(true)
       try {
-        const [productRes, reviewsRes] = await Promise.all([
-          getProduct(id),
-          getProductReviews(id)
-        ])
+        console.log('Fetching product:', id)
+        const productRes = await getProduct(id)
+        console.log('Product response:', productRes)
+        
+        if (!productRes.data) {
+          console.error('No product data received')
+          setProduct(null)
+          setLoading(false)
+          return
+        }
+        
         setProduct(productRes.data)
-        setReviews(reviewsRes.data || [])
+        
+        // Fetch reviews (don't fail if reviews fail)
+        try {
+          const reviewsRes = await getProductReviews(id)
+          setReviews(reviewsRes.data || [])
+        } catch (e) {
+          console.log('Reviews not available:', e)
+          setReviews([])
+        }
 
         // Fetch related products
-        const productsRes = await getProducts({ limit: 4 })
-        const filtered = (productsRes.data || []).filter(p => p.id !== parseInt(id))
-        setRelatedProducts(filtered.slice(0, 4))
+        try {
+          const productsRes = await getProducts({ limit: 4 })
+          const filtered = (productsRes.data || []).filter(p => p.id !== id)
+          setRelatedProducts(filtered.slice(0, 4))
+        } catch (e) {
+          console.log('Related products not available:', e)
+        }
       } catch (error) {
         console.error('Error fetching product:', error)
+        setProduct(null)
       } finally {
         setLoading(false)
       }

@@ -37,15 +37,26 @@ router.get('/', async (req, res) => {
 // Get single product
 router.get('/:id', async (req, res) => {
   try {
+    console.log('Fetching product:', req.params.id)
+    
     const { data, error } = await supabase
       .from('products')
       .select('*, collections(title)')
       .eq('id', req.params.id)
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('Supabase error:', error)
+      if (error.code === 'PGRST116') {
+        return res.status(404).json({ error: 'Product not found' })
+      }
+      throw error
+    }
+    
+    console.log('Product found:', data?.id)
     res.json({ data })
   } catch (error) {
+    console.error('Get product error:', error.message)
     res.status(500).json({ error: error.message })
   }
 })

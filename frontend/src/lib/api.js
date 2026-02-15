@@ -63,7 +63,7 @@ export const deleteOrder = (id) => api.delete(`/orders/${id}`)
 
 // Wishlist
 export const getWishlist = (userId) => api.get(`/wishlist/${userId}`)
-export const addToWishlist = (userId, productId) => api.post('/wishlist', { userId, productId })
+export const addToWishlist = (userId, productId) => api.post('/wishlist', { user_id: userId, product_id: productId })
 export const removeFromWishlist = (userId, productId) => api.delete(`/wishlist/${userId}/${productId}`)
 
 // Contact

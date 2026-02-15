@@ -11,7 +11,8 @@ export const signUp = async (email, password, metadata = {}) => {
     email,
     password,
     options: {
-      data: metadata
+      data: metadata,
+      emailRedirectTo: `${window.location.origin}/login`
     }
   })
   return { data, error }
@@ -22,6 +23,16 @@ export const signIn = async (email, password) => {
     email,
     password
   })
+  
+  // Handle common errors with better messages
+  if (error) {
+    if (error.message.includes('Invalid login credentials')) {
+      error.message = 'Invalid email or password. Please check your credentials.'
+    } else if (error.message.includes('Email not confirmed')) {
+      error.message = 'Please check your email to confirm your account before logging in.'
+    }
+  }
+  
   return { data, error }
 }
 
