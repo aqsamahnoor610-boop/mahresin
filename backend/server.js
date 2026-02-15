@@ -76,8 +76,12 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!' })
 })
 
-app.listen(PORT, () => {
-  console.log(`🚀 MahResin World Backend running on port ${PORT}`)
-})
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`🚀 MahResin World Backend running on port ${PORT}`)
+  })
+}
 
-module.exports = { supabase }
+// Export for Vercel
+module.exports = app
