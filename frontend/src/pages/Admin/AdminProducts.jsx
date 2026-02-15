@@ -51,25 +51,27 @@ const AdminProducts = () => {
       const uploadedUrls = []
 
       for (const file of files) {
-        const fileExt = file.name.split('.').pop()
-        const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`
-        const filePath = `products/${fileName}`
+        // Check file size (max 2MB per image)
+        if (file.size > 2 * 1024 * 1024) {
+          toast.error(`${file.name} is too large. Max 2MB per image.`)
+          continue
+        }
 
-        const { error: uploadError } = await supabase.storage
-          .from('images')
-          .upload(filePath, file)
+        // Convert to base64
+        const base64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onloadend = () => resolve(reader.result)
+          reader.onerror = reject
+          reader.readAsDataURL(file)
+        })
 
-        if (uploadError) throw uploadError
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('images')
-          .getPublicUrl(filePath)
-
-        uploadedUrls.push(publicUrl)
+        uploadedUrls.push(base64)
       }
 
-      setFormData({ ...formData, images: [...formData.images, ...uploadedUrls] })
-      toast.success('Images uploaded!')
+      if (uploadedUrls.length > 0) {
+        setFormData({ ...formData, images: [...formData.images, ...uploadedUrls] })
+        toast.success('Images uploaded!')
+      }
     } catch (error) {
       toast.error('Failed to upload images')
       console.error('Upload error:', error)

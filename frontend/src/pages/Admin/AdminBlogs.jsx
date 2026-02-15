@@ -39,27 +39,28 @@ const AdminBlogs = () => {
     const file = e.target.files[0]
     if (!file) return
 
+    // Check file size (max 2MB for base64)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image must be less than 2MB')
+      return
+    }
+
     setUploading(true)
     try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Date.now()}.${fileExt}`
-      const filePath = `blogs/${fileName}`
-
-      const { error: uploadError } = await supabase.storage
-        .from('images')
-        .upload(filePath, file)
-
-      if (uploadError) throw uploadError
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('images')
-        .getPublicUrl(filePath)
-
-      setFormData({ ...formData, image_url: publicUrl })
-      toast.success('Image uploaded!')
+      // Convert to base64
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setFormData({ ...formData, image_url: reader.result })
+        toast.success('Image uploaded!')
+        setUploading(false)
+      }
+      reader.onerror = () => {
+        toast.error('Failed to read image')
+        setUploading(false)
+      }
+      reader.readAsDataURL(file)
     } catch (error) {
       toast.error('Failed to upload image')
-    } finally {
       setUploading(false)
     }
   }
