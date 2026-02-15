@@ -11,10 +11,11 @@ const supabase = createClient(
 router.get('/', async (req, res) => {
   try {
     const { user_id, status } = req.query
+    console.log('Fetching orders:', { user_id, status })
 
     let query = supabase
       .from('orders')
-      .select('*, profiles(full_name, email)')
+      .select('*')
       .order('created_at', { ascending: false })
 
     if (user_id) {
@@ -27,9 +28,15 @@ router.get('/', async (req, res) => {
 
     const { data, error } = await query
 
-    if (error) throw error
+    if (error) {
+      console.error('Supabase error:', error)
+      throw error
+    }
+    
+    console.log('Orders found:', data?.length || 0)
     res.json({ data })
   } catch (error) {
+    console.error('Get orders error:', error.message)
     res.status(500).json({ error: error.message })
   }
 })
@@ -39,7 +46,7 @@ router.get('/:id', async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('orders')
-      .select('*, profiles(full_name, email)')
+      .select('*')
       .eq('id', req.params.id)
       .single()
 
