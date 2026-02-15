@@ -42,6 +42,7 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { title, description, image_url } = req.body
+    console.log('Creating collection:', { title, description, hasImage: !!image_url })
 
     const { data, error } = await supabase
       .from('collections')
@@ -49,9 +50,14 @@ router.post('/', async (req, res) => {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('Supabase error:', error)
+      throw error
+    }
+    console.log('Collection created:', data.id)
     res.status(201).json({ data })
   } catch (error) {
+    console.error('Create collection error:', error.message)
     res.status(500).json({ error: error.message })
   }
 })
@@ -60,6 +66,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { title, description, image_url } = req.body
+    console.log('Updating collection:', req.params.id, { title, description, hasImage: !!image_url })
 
     const { data, error } = await supabase
       .from('collections')
@@ -68,9 +75,14 @@ router.put('/:id', async (req, res) => {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('Supabase error:', error)
+      throw error
+    }
+    console.log('Collection updated:', data.id)
     res.json({ data })
   } catch (error) {
+    console.error('Update collection error:', error.message)
     res.status(500).json({ error: error.message })
   }
 })
